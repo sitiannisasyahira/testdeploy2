@@ -10,7 +10,7 @@ import os
 # KONFIGURASI HALAMAN
 # ==========================
 st.set_page_config(
-    page_title="🍎 Dashboard UAS - Deteksi & Klasifikasi",
+    page_title="🍎 Dashboard UTS - Deteksi & Klasifikasi",
     page_icon="🧠",
     layout="wide"
 )
@@ -50,7 +50,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 class='title'>🧠 Dashboard UAS - Deteksi & Klasifikasi Citra</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='title'>🧠 Dashboard UTS - Deteksi & Klasifikasi Citra</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subtitle'>Deteksi Apel & Jeruk 🍎🍊 dan Klasifikasi Daun 🌿</p>", unsafe_allow_html=True)
 
 # ==========================
@@ -114,9 +114,9 @@ tab1, tab2, tab3 = st.tabs(["🏠 Beranda", "🔍 Deteksi & Klasifikasi", "ℹ�
 # TAB 1 - BERANDA
 # ==========================
 with tab1:
-    st.markdown("### Selamat Datang di Dashboard Proyek UAS 👋")
+    st.markdown("### Selamat Datang di Dashboard Proyek UTS 👋")
     st.write("""
-        Aplikasi ini dibuat oleh **Siti Annisa Syahira** sebagai bagian dari proyek UAS.
+        Aplikasi ini dibuat oleh **Siti Annisa Syahira** sebagai bagian dari proyek **UTS**.
         Fungsinya adalah untuk:
         - 🔍 **Mendeteksi buah (Apel dan Jeruk)** menggunakan model YOLO (.pt).  
         - 🌿 **Mengklasifikasi daun** apakah **Sehat** atau **Tidak Sehat** menggunakan model Keras (.h5).  
@@ -182,10 +182,10 @@ with tab3:
         Model YOLO dan Keras dilatih secara terpisah menggunakan dataset khusus.
         Tujuan aplikasi ini adalah mempermudah analisis cepat terhadap citra buah dan daun.
     """)
-    st.info("Dikembangkan oleh **Siti Annisa Syahira (2025)** | Proyek UAS")
+    st.info("Dikembangkan oleh **Siti Annisa Syahira (2025)** | Proyek UTS")
 
 # ==========================
 # FOOTER
 # ==========================
 st.write("---")
-st.markdown("<footer>© 2025 | Proyek UAS - Siti Annisa Syahira</footer>", unsafe_allow_html=True)
+st.markdown("<footer>© 2025 | Proyek UTS - Siti Annisa Syahira</footer>", unsafe_allow_html=True)
