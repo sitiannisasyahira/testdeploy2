@@ -11,69 +11,54 @@ from ultralytics import YOLO
 st.set_page_config(page_title="🧠 Dashboard UTS", page_icon="🌿", layout="wide")
 
 # ==========================
-# CUSTOM CSS (NAVIGASI ELEGAN)
+# CUSTOM CSS
 # ==========================
 st.markdown("""
     <style>
     body {
-        background: linear-gradient(135deg, #f5fff5, #e8f5e9);
-        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #f0fff4, #e8f5e9);
+        font-family: 'Poppins', sans-serif;
     }
 
-    /* NAVIGATION BAR */
     .navbar {
-        position: fixed;
-        top: 0;
-        width: 100%;
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(15px);
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 50px;
-        border-bottom: 1px solid rgba(255,255,255,0.3);
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.45);
+        backdrop-filter: blur(12px);
+        border-radius: 15px;
+        margin: 10px auto 25px auto;
+        padding: 10px 20px;
+        width: 90%;
         box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        z-index: 9999;
     }
 
-    .nav-title {
-        font-size: 22px;
-        font-weight: 700;
-        color: #1b4332;
-        letter-spacing: 1px;
-    }
-
-    .nav-links {
-        display: flex;
-        gap: 40px;
-    }
-
-    .nav-link {
-        font-size: 17px;
+    .nav-item {
+        margin: 0 20px;
         font-weight: 500;
+        font-size: 16px;
         color: #2d6a4f;
         text-decoration: none;
-        transition: all 0.3s ease;
+        transition: 0.3s;
+        cursor: pointer;
     }
 
-    .nav-link:hover {
-        color: #40916c;
+    .nav-item:hover {
+        color: #1b4332;
         transform: translateY(-2px);
     }
 
-    .active-link {
-        border-bottom: 3px solid #2d6a4f;
-        padding-bottom: 4px;
-        color: #1b4332;
-        font-weight: 600;
+    .active {
+        color: #081c15 !important;
+        font-weight: 700;
+        border-bottom: 3px solid #1b4332;
+        padding-bottom: 2px;
     }
 
-    /* CONTENT */
     .page-title {
         text-align: center;
         font-size: 36px;
         font-weight: 800;
-        margin-top: 100px;
+        margin-top: 20px;
         color: #1b4332;
     }
 
@@ -81,7 +66,7 @@ st.markdown("""
         text-align: center;
         color: #555;
         font-size: 16px;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
     }
 
     .upload-box {
@@ -108,37 +93,34 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================
-# NAVIGATION
+# STATE MANAGEMENT
 # ==========================
 if "page" not in st.session_state:
     st.session_state.page = "Beranda"
 
-selected = st.session_state.page
+def set_page(p):
+    st.session_state.page = p
 
-nav_html = f"""
-<div class="navbar">
-    <div class="nav-title">🌿 Dashboard UTS</div>
-    <div class="nav-links">
-        <a class="nav-link {'active-link' if selected == 'Beranda' else ''}" 
-           onclick="window.parent.postMessage({{'page':'Beranda'}}, '*')">🏠 Beranda</a>
-        <a class="nav-link {'active-link' if selected == 'Deteksi' else ''}" 
-           onclick="window.parent.postMessage({{'page':'Deteksi'}}, '*')">🍎 Deteksi Buah</a>
-        <a class="nav-link {'active-link' if selected == 'Klasifikasi' else ''}" 
-           onclick="window.parent.postMessage({{'page':'Klasifikasi'}}, '*')">🌿 Klasifikasi Daun</a>
-        <a class="nav-link {'active-link' if selected == 'Tentang' else ''}" 
-           onclick="window.parent.postMessage({{'page':'Tentang'}}, '*')">ℹ️ Tentang</a>
-    </div>
-</div>
+# ==========================
+# NAVBAR STREAMLIT
+# ==========================
+col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
-<script>
-window.addEventListener('message', (event) => {{
-    if (event.data.page) {{
-        window.parent.postMessage({{type:'streamlit:setPage', page:event.data.page}}, '*');
-    }}
-}});
-</script>
-"""
-st.components.v1.html(nav_html, height=70)
+with st.container():
+    st.markdown("<div class='navbar'>", unsafe_allow_html=True)
+    with col1:
+        if st.button("🏠 Beranda"):
+            set_page("Beranda")
+    with col2:
+        if st.button("🍎 Deteksi Buah"):
+            set_page("Deteksi")
+    with col3:
+        if st.button("🌿 Klasifikasi Daun"):
+            set_page("Klasifikasi")
+    with col4:
+        if st.button("ℹ️ Tentang"):
+            set_page("Tentang")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================
 # LOAD MODELS
@@ -156,62 +138,63 @@ except:
     st.stop()
 
 # ==========================
-# PAGE CONTENT
+# HALAMAN BERDASARKAN NAVIGASI
 # ==========================
-page = st.session_state.page
-
-if page == "Beranda":
+if st.session_state.page == "Beranda":
     st.markdown("<h1 class='page-title'>🧠 Dashboard UTS - Deteksi & Klasifikasi Citra</h1>", unsafe_allow_html=True)
     st.markdown("<p class='subtext'>Dikembangkan oleh <b>Siti Annisa Syahira</b> | Menggunakan YOLOv8 dan TensorFlow</p>", unsafe_allow_html=True)
     st.image("https://cdn.pixabay.com/photo/2018/08/06/22/24/apple-3580668_1280.jpg", use_container_width=True)
-    st.info("Gunakan menu di atas untuk melakukan deteksi atau klasifikasi gambar 🌿")
+    st.info("Gunakan tombol di atas untuk berpindah halaman 🌿")
 
-elif page == "Deteksi":
+elif st.session_state.page == "Deteksi":
     st.markdown("<h1 class='page-title'>🍎 Deteksi Buah (Apel & Jeruk)</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='subtext'>Gunakan model YOLOv8 untuk mendeteksi objek pada gambar buah.</p>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown('<div class="upload-box">', unsafe_allow_html=True)
-        uploaded = st.file_uploader("Unggah gambar buah", type=["jpg", "jpeg", "png"])
-        st.markdown('</div>', unsafe_allow_html=True)
-        if uploaded:
-            img = Image.open(uploaded)
-            st.image(img, caption="Gambar diunggah", use_container_width=True)
-            with st.spinner("🔍 Mendeteksi buah..."):
-                results = yolo_model(img)
-                result_img = results[0].plot()
-            st.image(result_img, caption="Hasil Deteksi YOLOv8", use_container_width=True)
-            st.success("✅ Deteksi selesai!")
+    st.markdown("<p class='subtext'>Model YOLOv8 akan mendeteksi buah dan menentukan apakah apel kulit tipis atau jeruk kulit tebal.</p>", unsafe_allow_html=True)
 
-elif page == "Klasifikasi":
+    st.markdown('<div class="upload-box">', unsafe_allow_html=True)
+    uploaded = st.file_uploader("Unggah gambar buah", type=["jpg", "jpeg", "png"])
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    if uploaded:
+        img = Image.open(uploaded)
+        st.image(img, caption="Gambar diunggah", use_container_width=True)
+        with st.spinner("🔍 Sedang mendeteksi..."):
+            results = yolo_model(img)
+            result_img = results[0].plot()
+        st.image(result_img, caption="Hasil Deteksi YOLOv8", use_container_width=True)
+        st.success("✅ Deteksi selesai!")
+
+elif st.session_state.page == "Klasifikasi":
     st.markdown("<h1 class='page-title'>🌿 Klasifikasi Daun Sehat / Tidak Sehat</h1>", unsafe_allow_html=True)
     st.markdown("<p class='subtext'>Gunakan model TensorFlow untuk menentukan kondisi daun.</p>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown('<div class="upload-box">', unsafe_allow_html=True)
-        uploaded = st.file_uploader("Unggah gambar daun", type=["jpg", "jpeg", "png"])
-        st.markdown('</div>', unsafe_allow_html=True)
 
-        if uploaded:
-            img = Image.open(uploaded)
-            st.image(img, caption="Gambar daun diunggah", use_container_width=True)
-            img_resized = img.resize((224, 224))
-            img_array = image.img_to_array(img_resized)
-            img_array = np.expand_dims(img_array, axis=0) / 255.0
-            prediction = classifier.predict(img_array)
-            label = "🌱 Daun Sehat" if np.argmax(prediction) == 0 else "🍂 Daun Tidak Sehat"
-            conf = np.max(prediction) * 100
-            st.success(f"**Hasil Prediksi:** {label}")
-            st.progress(float(conf)/100)
-            st.write(f"Tingkat keyakinan: {conf:.2f}%")
+    st.markdown('<div class="upload-box">', unsafe_allow_html=True)
+    uploaded = st.file_uploader("Unggah gambar daun", type=["jpg", "jpeg", "png"])
+    st.markdown('</div>', unsafe_allow_html=True)
 
-elif page == "Tentang":
+    if uploaded:
+        img = Image.open(uploaded)
+        st.image(img, caption="Gambar daun diunggah", use_container_width=True)
+        img_resized = img.resize((224, 224))
+        img_array = image.img_to_array(img_resized)
+        img_array = np.expand_dims(img_array, axis=0) / 255.0
+
+        prediction = classifier.predict(img_array)
+        label = "🌱 Daun Sehat" if np.argmax(prediction) == 0 else "🍂 Daun Tidak Sehat"
+        conf = np.max(prediction) * 100
+        st.success(f"**Hasil Prediksi:** {label}")
+        st.progress(float(conf)/100)
+        st.write(f"Tingkat keyakinan: {conf:.2f}%")
+
+elif st.session_state.page == "Tentang":
     st.markdown("<h1 class='page-title'>ℹ️ Tentang Aplikasi</h1>", unsafe_allow_html=True)
     st.write("""
-        Aplikasi ini dikembangkan sebagai **proyek UTS** oleh *Siti Annisa Syahira*.  
-        Menggunakan:
-        - YOLOv8 untuk deteksi objek buah 🍎  
-        - TensorFlow/Keras untuk klasifikasi daun 🌿  
-        - Streamlit sebagai platform dashboard interaktif 🎨
+        Aplikasi ini merupakan **proyek UTS** oleh *Siti Annisa Syahira*.  
+        Dibangun menggunakan:
+        - YOLOv8 untuk deteksi buah 🍎  
+        - TensorFlow untuk klasifikasi daun 🌿  
+        - Streamlit untuk antarmuka dashboard 🎨  
+
+        Desain: elegan, ringan, dan responsif ✨
     """)
-    st.info("Desain elegan dengan glass-effect, menonjolkan kesederhanaan & profesionalisme.")
 
 st.markdown("<p class='footer'>© 2025 | Dashboard UTS - Siti Annisa Syahira 🌱</p>", unsafe_allow_html=True)
