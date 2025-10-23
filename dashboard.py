@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 import numpy as np
 from PIL import Image
-import cv2
+import os
 
 # ==========================
 # Konfigurasi Halaman
@@ -33,25 +33,51 @@ st.markdown("<p class='subtitle'>Deteksi objek (Apel/Jeruk) dan Klasifikasi daun
 st.write("---")
 
 # ==========================
-# Load Model
+# Load Model dengan Penanganan Error
 # ==========================
 @st.cache_resource
 def load_models():
-    yolo_model = YOLO("model/Siti Annisa Syahira_Laporan 4.pt")  # model deteksi apel & jeruk
-    classifier = tf.keras.models.load_model("model/Siti Annisa Syahira_Laporan 2.h5")  # model klasifikasi daun
+    yolo_path = "model/Siti Annisa Syahira_Laporan 4.pt"
+    h5_path = "model/Siti Annisa Syahira_Laporan 2.h5"
+
+    # --- Cek keberadaan file ---
+    if not os.path.exists(yolo_path):
+        raise FileNotFoundError(f"Model YOLO tidak ditemukan di: {os.path.abspath(yolo_path)}")
+    if not os.path.exists(h5_path):
+        raise FileNotFoundError(f"Model klasifikasi (.h5) tidak ditemukan di: {os.path.abspath(h5_path)}")
+
+    # --- Load model YOLO ---
+    try:
+        yolo_model = YOLO(yolo_path)
+    except Exception as e:
+        st.error(f"Gagal memuat model YOLO: {e}")
+        raise e
+
+    # --- Load model klasifikasi ---
+    try:
+        classifier = tf.keras.models.load_model(h5_path)
+    except Exception as e:
+        st.error(f"Gagal memuat model Keras (.h5): {e}")
+        raise e
+
     return yolo_model, classifier
 
-yolo_model, classifier = load_models()
+try:
+    yolo_model, classifier = load_models()
+    st.success("✅ Semua model berhasil dimuat!")
+except Exception as e:
+    st.error("🚨 Terjadi kesalahan saat memuat model. Periksa nama dan lokasi file.")
+    st.stop()
 
 # ==========================
 # Sidebar
 # ==========================
 menu = st.sidebar.radio("📂 Pilih Mode Analisis:", ["Deteksi Objek (Apel/Jeruk)", "Klasifikasi Daun"])
-st.sidebar.info("Gunakan mode yang sesuai dengan data yang ingin kamu analisis 👇")
 uploaded_file = st.sidebar.file_uploader("📤 Unggah Gambar", type=["jpg", "jpeg", "png"])
+st.sidebar.info("Gunakan mode yang sesuai dengan data yang ingin kamu analisis 👇")
 
 # ==========================
-# Fungsi Klasifikasi
+# Fungsi Klasifikasi Daun
 # ==========================
 def predict_leaf(image_pil):
     img_resized = image_pil.resize((224, 224))
@@ -78,10 +104,9 @@ if uploaded_file is not None:
     if menu == "Deteksi Objek (Apel/Jeruk)":
         with st.spinner("🔍 Mendeteksi objek dengan YOLO..."):
             results = yolo_model(img)
-            result_img = results[0].plot()  # hasil deteksi (dengan box)
+            result_img = results[0].plot()
             col2.image(result_img, caption="🎯 Hasil Deteksi", use_container_width=True)
 
-            # tampilkan label & confidence tiap deteksi
             st.subheader("📊 Detail Deteksi:")
             for box in results[0].boxes:
                 cls_id = int(box.cls[0])
@@ -98,7 +123,6 @@ if uploaded_file is not None:
             col2.markdown(f"<div class='result-box'><h3 style='color:{color};'>{label}</h3>"
                           f"<p>Probabilitas: <b>{confidence:.2f}</b></p></div>", unsafe_allow_html=True)
             st.balloons()
-
 else:
     st.info("⬅️ Silakan unggah gambar terlebih dahulu melalui sidebar.")
 
