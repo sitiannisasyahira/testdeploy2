@@ -7,7 +7,7 @@ from PIL import Image
 import os
 
 # ==========================
-# Konfigurasi Halaman
+# KONFIGURASI HALAMAN
 # ==========================
 st.set_page_config(
     page_title="🍎 Dashboard Deteksi & Klasifikasi",
@@ -33,56 +33,62 @@ st.markdown("<p class='subtitle'>Deteksi objek (Apel/Jeruk) dan Klasifikasi daun
 st.write("---")
 
 # ==========================
-# Load Model dengan Penanganan Error
+# LOAD MODEL
 # ==========================
 @st.cache_resource
 def load_models():
     yolo_path = "model/Siti Annisa Syahira_Laporan 4.pt"
     h5_path = "model/Siti Annisa Syahira_Laporan 2.h5"
 
-    # --- Cek keberadaan file ---
+    # Cek file
     if not os.path.exists(yolo_path):
         raise FileNotFoundError(f"Model YOLO tidak ditemukan di: {os.path.abspath(yolo_path)}")
     if not os.path.exists(h5_path):
         raise FileNotFoundError(f"Model klasifikasi (.h5) tidak ditemukan di: {os.path.abspath(h5_path)}")
 
-    # --- Load model YOLO ---
-    try:
-        yolo_model = YOLO(yolo_path)
-    except Exception as e:
-        st.error(f"Gagal memuat model YOLO: {e}")
-        raise e
-
-    # --- Load model klasifikasi ---
-    try:
-        classifier = tf.keras.models.load_model(h5_path)
-    except Exception as e:
-        st.error(f"Gagal memuat model Keras (.h5): {e}")
-        raise e
-
+    # Load model YOLO dan Keras
+    yolo_model = YOLO(yolo_path)
+    classifier = tf.keras.models.load_model(h5_path)
     return yolo_model, classifier
 
 try:
     yolo_model, classifier = load_models()
     st.success("✅ Semua model berhasil dimuat!")
+    st.write("📏 Input shape model klasifikasi:", classifier.input_shape)
 except Exception as e:
-    st.error("🚨 Terjadi kesalahan saat memuat model. Periksa nama dan lokasi file.")
+    st.error(f"🚨 Terjadi kesalahan saat memuat model: {e}")
     st.stop()
 
 # ==========================
-# Sidebar
+# SIDEBAR
 # ==========================
 menu = st.sidebar.radio("📂 Pilih Mode Analisis:", ["Deteksi Objek (Apel/Jeruk)", "Klasifikasi Daun"])
 uploaded_file = st.sidebar.file_uploader("📤 Unggah Gambar", type=["jpg", "jpeg", "png"])
 st.sidebar.info("Gunakan mode yang sesuai dengan data yang ingin kamu analisis 👇")
 
 # ==========================
-# Fungsi Klasifikasi Daun
+# FUNGSI KLASIFIKASI DAUN (OTOMATIS SESUAI SHAPE MODEL)
 # ==========================
 def predict_leaf(image_pil):
-    img_resized = image_pil.resize((224, 224))
+    input_shape = classifier.input_shape  # (None, H, W, C)
+    target_size = (input_shape[1], input_shape[2])
+
+    # Jika model pakai 1 channel (grayscale)
+    if input_shape[3] == 1:
+        img = image_pil.convert("L")
+    else:
+        img = image_pil.convert("RGB")
+
+    # Resize gambar sesuai model
+    img_resized = img.resize(target_size)
     img_array = image.img_to_array(img_resized)
+
+    # Kalau model butuh 1 channel tapi input 3, ubah dimensi
+    if input_shape[3] == 1 and img_array.ndim == 3:
+        img_array = np.expand_dims(img_array[:, :, 0], axis=-1)
+
     img_array = np.expand_dims(img_array, axis=0) / 255.0
+
     prediction = classifier.predict(img_array)
     class_index = np.argmax(prediction)
     confidence = np.max(prediction)
@@ -93,7 +99,7 @@ def predict_leaf(image_pil):
     return label, confidence, color
 
 # ==========================
-# Bagian Utama
+# HALAMAN UTAMA
 # ==========================
 col1, col2 = st.columns(2)
 
@@ -119,7 +125,6 @@ if uploaded_file is not None:
     elif menu == "Klasifikasi Daun":
         with st.spinner("🧬 Menganalisis kondisi daun..."):
             label, confidence, color = predict_leaf(img)
-
             col2.markdown(f"<div class='result-box'><h3 style='color:{color};'>{label}</h3>"
                           f"<p>Probabilitas: <b>{confidence:.2f}</b></p></div>", unsafe_allow_html=True)
             st.balloons()
@@ -127,7 +132,7 @@ else:
     st.info("⬅️ Silakan unggah gambar terlebih dahulu melalui sidebar.")
 
 # ==========================
-# Footer
+# FOOTER
 # ==========================
 st.write("---")
 st.markdown("<p style='text-align:center; color:gray;'>© 2025 | Proyek UAS - Siti Annisa Syahira</p>", unsafe_allow_html=True)
