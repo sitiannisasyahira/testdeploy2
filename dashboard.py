@@ -20,21 +20,54 @@ st.set_page_config(
 # ==========================
 st.markdown("""
     <style>
+        /* BODY */
         body {
             background-color: #F8FAFC;
+            font-family: 'Poppins', sans-serif;
         }
-        .title {
+
+        /* SIDEBAR */
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #E0FBE2, #C8E6C9);
+            color: #2E7D32;
+        }
+
+        [data-testid="stSidebar"] h2 {
             text-align: center;
-            color: #2E8B57;
-            font-size: 36px;
             font-weight: bold;
+            color: #2E7D32;
         }
-        .subtitle {
+
+        [data-testid="stSidebar"] a {
+            text-decoration: none;
+            font-size: 17px;
+            color: #1B5E20;
+            padding: 8px 18px;
+            display: block;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        [data-testid="stSidebar"] a:hover {
+            background-color: #A5D6A7;
+            transform: scale(1.03);
+        }
+
+        .main-title {
             text-align: center;
-            color: gray;
+            color: #2E7D32;
+            font-size: 38px;
+            font-weight: 800;
+            margin-bottom: -10px;
+        }
+
+        .sub-title {
+            text-align: center;
+            color: #555;
             font-size: 18px;
             margin-bottom: 30px;
         }
+
         .result-box {
             padding: 20px; 
             border-radius: 15px; 
@@ -42,6 +75,7 @@ st.markdown("""
             text-align: center;
             box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
         }
+
         footer {
             text-align: center;
             color: gray;
@@ -50,11 +84,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 class='title'>🧠 Dashboard UTS - Deteksi & Klasifikasi Citra</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitle'>Deteksi Apel & Jeruk 🍎🍊 dan Klasifikasi Daun 🌿</p>", unsafe_allow_html=True)
-
 # ==========================
-# LOAD MODEL DENGAN AMAN
+# LOAD MODEL
 # ==========================
 @st.cache_resource
 def load_models():
@@ -77,10 +108,10 @@ except Exception as e:
     st.stop()
 
 # ==========================
-# FUNGSI PREDIKSI DAUN
+# FUNGSI PREDIKSI
 # ==========================
 def predict_leaf(image_pil):
-    input_shape = classifier.input_shape  # (None, H, W, C)
+    input_shape = classifier.input_shape
     target_size = (input_shape[1], input_shape[2])
 
     if input_shape[3] == 1:
@@ -106,14 +137,21 @@ def predict_leaf(image_pil):
     return label, confidence, color
 
 # ==========================
-# NAVIGASI TABS
+# NAVIGASI SIDEBAR
 # ==========================
-tab1, tab2, tab3 = st.tabs(["🏠 Beranda", "🔍 Deteksi & Klasifikasi", "ℹ️ Tentang Aplikasi"])
+st.sidebar.title("🌿 Navigasi Utama")
+menu = st.sidebar.radio(
+    "Pilih Halaman:",
+    ["🏠 Beranda", "🔍 Deteksi & Klasifikasi", "ℹ️ Tentang Aplikasi"]
+)
 
 # ==========================
-# TAB 1 - BERANDA
+# HALAMAN BERANDA
 # ==========================
-with tab1:
+if menu == "🏠 Beranda":
+    st.markdown("<h1 class='main-title'>🧠 Dashboard UTS</h1>", unsafe_allow_html=True)
+    st.markdown("<p class='sub-title'>Deteksi Apel & Jeruk 🍎🍊 dan Klasifikasi Daun 🌿</p>", unsafe_allow_html=True)
+
     st.markdown("### Selamat Datang di Dashboard Proyek UTS 👋")
     st.write("""
         Aplikasi ini dibuat oleh **Siti Annisa Syahira** sebagai bagian dari proyek **UTS**.
@@ -121,16 +159,16 @@ with tab1:
         - 🔍 **Mendeteksi buah (Apel dan Jeruk)** menggunakan model YOLO (.pt).  
         - 🌿 **Mengklasifikasi daun** apakah **Sehat** atau **Tidak Sehat** menggunakan model Keras (.h5).  
         
-        Dashboard ini interaktif dan dirancang agar mudah digunakan serta menarik untuk presentasi.
+        Dashboard ini interaktif, modern, dan cocok untuk presentasi UTS kamu!
     """)
     st.image("https://cdn.pixabay.com/photo/2017/01/20/00/30/orange-1995056_1280.jpg", use_container_width=True)
-    st.success("Klik tab **Deteksi & Klasifikasi** di atas untuk mulai menggunakan aplikasi ini 🚀")
+    st.success("Klik menu **Deteksi & Klasifikasi** di sidebar untuk mulai 🚀")
 
 # ==========================
-# TAB 2 - DETEKSI & KLASIFIKASI
+# HALAMAN DETEKSI & KLASIFIKASI
 # ==========================
-with tab2:
-    st.markdown("### 📸 Unggah Gambar untuk Analisis")
+elif menu == "🔍 Deteksi & Klasifikasi":
+    st.markdown("<h2 style='color:#2E7D32;'>📸 Unggah Gambar untuk Analisis</h2>", unsafe_allow_html=True)
 
     mode = st.selectbox("Pilih Mode Analisis:", ["Deteksi Objek (Apel/Jeruk)", "Klasifikasi Daun"])
     uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "jpeg", "png"])
@@ -169,18 +207,18 @@ with tab2:
         st.info("⬆️ Silakan unggah gambar terlebih dahulu untuk melanjutkan.")
 
 # ==========================
-# TAB 3 - TENTANG
+# HALAMAN TENTANG
 # ==========================
-with tab3:
-    st.markdown("### 👩‍💻 Tentang Aplikasi")
+elif menu == "ℹ️ Tentang Aplikasi":
+    st.markdown("<h2 style='color:#2E7D32;'>👩‍💻 Tentang Aplikasi</h2>", unsafe_allow_html=True)
     st.write("""
         Aplikasi ini dikembangkan menggunakan:
-        - **Streamlit** untuk antarmuka web.
+        - **Streamlit** untuk antarmuka web interaktif.
         - **YOLO (You Only Look Once)** untuk deteksi objek buah (Apel dan Jeruk).
         - **TensorFlow / Keras** untuk klasifikasi daun (Sehat / Tidak Sehat).
 
-        Model YOLO dan Keras dilatih secara terpisah menggunakan dataset khusus.
-        Tujuan aplikasi ini adalah mempermudah analisis cepat terhadap citra buah dan daun.
+        Model dilatih secara terpisah menggunakan dataset khusus.
+        Tujuan aplikasi ini adalah mempermudah analisis cepat terhadap citra buah dan daun 🌿.
     """)
     st.info("Dikembangkan oleh **Siti Annisa Syahira (2025)** | Proyek UTS")
 
