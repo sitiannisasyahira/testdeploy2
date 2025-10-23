@@ -4,93 +4,135 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 import numpy as np
 from PIL import Image
+import os
 
 # ==========================
-# Load Models
+# KONFIGURASI HALAMAN
+# ==========================
+st.set_page_config(
+    page_title="🍎 Dashboard Deteksi & Klasifikasi",
+    page_icon="🧠",
+    layout="wide"
+)
+
+st.markdown("""
+    <style>
+        .title {text-align: center; color: #2E8B57;}
+        .subtitle {text-align: center; font-size:18px; color: gray;}
+        .result-box {
+            padding: 15px; 
+            border-radius: 10px; 
+            background-color: #f0f2f6;
+            text-align: center;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown("<h1 class='title'>🧠 Dashboard Deteksi & Klasifikasi Citra</h1>", unsafe_allow_html=True)
+st.markdown("<p class='subtitle'>Deteksi objek (Apel/Jeruk) dan Klasifikasi daun (Sehat/Tidak Sehat)</p>", unsafe_allow_html=True)
+st.write("---")
+
+# ==========================
+# LOAD MODEL
 # ==========================
 @st.cache_resource
 def load_models():
-    try:
-        yolo_model = YOLO("model/Siti Annisa Syahira_Laporan 4.pt")  # Model deteksi objek (apel & jeruk)
-    except Exception as e:
-        st.error(f"❌ Gagal memuat model YOLO: {e}")
-        yolo_model = None
+    yolo_path = "model/Siti Annisa Syahira_Laporan 4.pt"
+    h5_path = "model/Siti Annisa Syahira_Laporan 2.h5"
 
-    try:
-        classifier = tf.keras.models.load_model("model/Siti Annisa Syahira_Laporan 2.h5")  # Model klasifikasi daun
-    except Exception as e:
-        st.error(f"❌ Gagal memuat model klasifikasi daun: {e}")
-        classifier = None
+    # Cek file
+    if not os.path.exists(yolo_path):
+        raise FileNotFoundError(f"Model YOLO tidak ditemukan di: {os.path.abspath(yolo_path)}")
+    if not os.path.exists(h5_path):
+        raise FileNotFoundError(f"Model klasifikasi (.h5) tidak ditemukan di: {os.path.abspath(h5_path)}")
 
+    # Load model YOLO dan Keras
+    yolo_model = YOLO(yolo_path)
+    classifier = tf.keras.models.load_model(h5_path)
     return yolo_model, classifier
 
-yolo_model, classifier = load_models()
+try:
+    yolo_model, classifier = load_models()
+    st.success("✅ Semua model berhasil dimuat!")
+    st.write("📏 Input shape model klasifikasi:", classifier.input_shape)
+except Exception as e:
+    st.error(f"🚨 Terjadi kesalahan saat memuat model: {e}")
+    st.stop()
 
 # ==========================
-# Fungsi Prediksi Daun
+# SIDEBAR
 # ==========================
-def predict_leaf(img):
-    img_resized = img.resize((224, 224))
+menu = st.sidebar.radio("📂 Pilih Mode Analisis:", ["Deteksi Objek (Apel/Jeruk)", "Klasifikasi Daun"])
+uploaded_file = st.sidebar.file_uploader("📤 Unggah Gambar", type=["jpg", "jpeg", "png"])
+st.sidebar.info("Gunakan mode yang sesuai dengan data yang ingin kamu analisis 👇")
+
+# ==========================
+# FUNGSI KLASIFIKASI DAUN (OTOMATIS SESUAI SHAPE MODEL)
+# ==========================
+def predict_leaf(image_pil):
+    input_shape = classifier.input_shape  # (None, H, W, C)
+    target_size = (input_shape[1], input_shape[2])
+
+    # Jika model pakai 1 channel (grayscale)
+    if input_shape[3] == 1:
+        img = image_pil.convert("L")
+    else:
+        img = image_pil.convert("RGB")
+
+    # Resize gambar sesuai model
+    img_resized = img.resize(target_size)
     img_array = image.img_to_array(img_resized)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = img_array / 255.0
+
+    # Kalau model butuh 1 channel tapi input 3, ubah dimensi
+    if input_shape[3] == 1 and img_array.ndim == 3:
+        img_array = np.expand_dims(img_array[:, :, 0], axis=-1)
+
+    img_array = np.expand_dims(img_array, axis=0) / 255.0
 
     prediction = classifier.predict(img_array)
-    class_names = ["Daun Sehat", "Daun Tidak Sehat"]
-
-    prob = float(np.max(prediction))
     class_index = np.argmax(prediction)
-    label = class_names[class_index]
+    confidence = np.max(prediction)
 
-    color = "🟢" if label == "Daun Sehat" else "🔴"
-    return label, prob, color
+    label = "🌿 Daun Sehat" if class_index == 0 else "🍂 Daun Tidak Sehat"
+    color = "green" if class_index == 0 else "red"
 
-# ==========================
-# Fungsi Prediksi Buah (YOLO)
-# ==========================
-def detect_fruit(img):
-    results = yolo_model(img)
-    result_img = results[0].plot()
-    detected_classes = [r.names[int(c)] for c in results[0].boxes.cls]
-    return result_img, detected_classes
+    return label, confidence, color
 
 # ==========================
-# UI
+# HALAMAN UTAMA
 # ==========================
-st.title("🍃 Dashboard Klasifikasi & Deteksi Gambar")
-st.markdown("### Proyek UAS — Siti Annisa Syahira")
-st.write("Gunakan aplikasi ini untuk mendeteksi **buah (apel/jeruk)** dan **klasifikasi kondisi daun** apakah **sehat** atau **tidak sehat**.")
-
-menu = st.sidebar.radio("Pilih Mode Analisis:", ["🧠 Klasifikasi Daun", "🍎 Deteksi Buah (YOLO)"])
-uploaded_file = st.file_uploader("📤 Unggah Gambar", type=["jpg", "jpeg", "png"])
+col1, col2 = st.columns(2)
 
 if uploaded_file is not None:
     img = Image.open(uploaded_file)
-    st.image(img, caption="🖼️ Gambar Diupload", use_container_width=True)
+    col1.image(img, caption="📸 Gambar Asli", use_container_width=True)
 
-    if menu == "🧠 Klasifikasi Daun":
-        if classifier is not None:
-            label, prob, color = predict_leaf(img)
-            st.success(f"Hasil Prediksi: {color} **{label}**")
-            st.progress(prob)
-            st.write(f"🔍 Probabilitas keyakinan model: `{prob:.2f}`")
-        else:
-            st.error("Model klasifikasi daun belum dimuat.")
+    if menu == "Deteksi Objek (Apel/Jeruk)":
+        with st.spinner("🔍 Mendeteksi objek dengan YOLO..."):
+            results = yolo_model(img)
+            result_img = results[0].plot()
+            col2.image(result_img, caption="🎯 Hasil Deteksi", use_container_width=True)
 
-    elif menu == "🍎 Deteksi Buah (YOLO)":
-        if yolo_model is not None:
-            result_img, detected = detect_fruit(img)
-            st.image(result_img, caption="📸 Hasil Deteksi Buah", use_container_width=True)
+            st.subheader("📊 Detail Deteksi:")
+            for box in results[0].boxes:
+                cls_id = int(box.cls[0])
+                conf = float(box.conf[0])
+                label = results[0].names[cls_id]
+                st.markdown(f"- **Objek:** {label} | **Akurasi:** `{conf:.2f}`")
 
-            if detected:
-                st.info(f"Buah yang terdeteksi: **{', '.join(detected)}**")
-            else:
-                st.warning("Tidak ada buah terdeteksi.")
-        else:
-            st.error("Model YOLO belum dimuat.")
+            st.success("✅ Deteksi selesai!")
+
+    elif menu == "Klasifikasi Daun":
+        with st.spinner("🧬 Menganalisis kondisi daun..."):
+            label, confidence, color = predict_leaf(img)
+            col2.markdown(f"<div class='result-box'><h3 style='color:{color};'>{label}</h3>"
+                          f"<p>Probabilitas: <b>{confidence:.2f}</b></p></div>", unsafe_allow_html=True)
+            st.balloons()
+else:
+    st.info("⬅️ Silakan unggah gambar terlebih dahulu melalui sidebar.")
 
 # ==========================
-# Footer
+# FOOTER
 # ==========================
-st.markdown("---")
-st.caption("Dibuat oleh **Siti Annisa Syahira** | Proyek UAS 2025 🌿")
+st.write("---")
+st.markdown("<p style='text-align:center; color:gray;'>© 2025 | Proyek UAS - Siti Annisa Syahira</p>", unsafe_allow_html=True)
