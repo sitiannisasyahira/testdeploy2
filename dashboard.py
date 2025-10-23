@@ -2,192 +2,190 @@ import streamlit as st
 from ultralytics import YOLO
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
-from PIL import Image
 import numpy as np
+from PIL import Image
+import os
 
 # ==========================
-# CONFIG
+# KONFIGURASI HALAMAN
 # ==========================
-st.set_page_config(page_title="Dashboard UTS - Siti Annisa Syahira", layout="wide")
+st.set_page_config(
+    page_title="🍎 Dashboard UAS - Deteksi & Klasifikasi",
+    page_icon="🧠",
+    layout="wide"
+)
 
 # ==========================
-# CUSTOM STYLE (efek daun)
+# CSS STYLING
 # ==========================
 st.markdown("""
     <style>
-    body {
-        background: linear-gradient(135deg, #f8fff8 0%, #d8f3dc 100%);
-        font-family: 'Poppins', sans-serif;
-    }
-    .nav-button {
-        display: inline-block;
-        margin: 8px;
-        padding: 10px 22px;
-        background-color: #ffffffcc;
-        border-radius: 25px;
-        border: 1px solid #ccc;
-        color: #333;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    .nav-button:hover {
-        background-color: #2d6a4f;
-        color: white;
-        transform: scale(1.05);
-    }
-    .page-title {
-        text-align: center;
-        font-weight: 700;
-        font-size: 28px;
-        color: #2d6a4f;
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-    .footer {
-        text-align:center;
-        margin-top:40px;
-        color: #666;
-        font-size: 14px;
-    }
-
-    /* Efek daun jatuh */
-    @keyframes fall {
-      0% {transform: translateY(-10vh) rotate(0deg);}
-      100% {transform: translateY(100vh) rotate(360deg);}
-    }
-    .leaf {
-      position: fixed;
-      top: -10vh;
-      font-size: 24px;
-      animation: fall linear infinite;
-      opacity: 0.8;
-      z-index: 999;
-    }
+        body {
+            background-color: #F8FAFC;
+        }
+        .title {
+            text-align: center;
+            color: #2E8B57;
+            font-size: 36px;
+            font-weight: bold;
+        }
+        .subtitle {
+            text-align: center;
+            color: gray;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .result-box {
+            padding: 20px; 
+            border-radius: 15px; 
+            background-color: #f0f2f6;
+            text-align: center;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+        }
+        footer {
+            text-align: center;
+            color: gray;
+            margin-top: 40px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
+st.markdown("<h1 class='title'>🧠 Dashboard UAS - Deteksi & Klasifikasi Citra</h1>", unsafe_allow_html=True)
+st.markdown("<p class='subtitle'>Deteksi Apel & Jeruk 🍎🍊 dan Klasifikasi Daun 🌿</p>", unsafe_allow_html=True)
+
 # ==========================
-# LOAD MODEL
+# LOAD MODEL DENGAN AMAN
 # ==========================
 @st.cache_resource
 def load_models():
-    yolo_model = YOLO("model/Siti Annisa Syahira_Laporan 4.pt")
-    classifier = tf.keras.models.load_model("model/Siti Annisa Syahira_Laporan 2.h5")
+    yolo_path = "model/Siti Annisa Syahira_Laporan 4.pt"
+    h5_path = "model/Siti Annisa Syahira_Laporan 2.h5"
+
+    if not os.path.exists(yolo_path):
+        raise FileNotFoundError(f"❌ File YOLO tidak ditemukan di: {os.path.abspath(yolo_path)}")
+    if not os.path.exists(h5_path):
+        raise FileNotFoundError(f"❌ File H5 tidak ditemukan di: {os.path.abspath(h5_path)}")
+
+    yolo_model = YOLO(yolo_path)
+    classifier = tf.keras.models.load_model(h5_path)
     return yolo_model, classifier
 
-yolo_model, classifier = load_models()
+try:
+    yolo_model, classifier = load_models()
+except Exception as e:
+    st.error(f"Gagal memuat model: {e}")
+    st.stop()
 
 # ==========================
-# NAVIGASI
+# FUNGSI PREDIKSI DAUN
 # ==========================
-if "page" not in st.session_state:
-    st.session_state.page = "Beranda"
+def predict_leaf(image_pil):
+    input_shape = classifier.input_shape  # (None, H, W, C)
+    target_size = (input_shape[1], input_shape[2])
 
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    if st.button("🏠 Beranda"):
-        st.session_state.page = "Beranda"
-with col2:
-    if st.button("🍎 Deteksi Objek"):
-        st.session_state.page = "Deteksi"
-with col3:
-    if st.button("🌿 Klasifikasi"):
-        st.session_state.page = "Klasifikasi"
-with col4:
-    if st.button("ℹ️ Tentang"):
-        st.session_state.page = "Tentang"
+    if input_shape[3] == 1:
+        img = image_pil.convert("L")
+    else:
+        img = image_pil.convert("RGB")
 
-st.markdown("<hr>", unsafe_allow_html=True)
+    img_resized = img.resize(target_size)
+    img_array = image.img_to_array(img_resized)
+
+    if input_shape[3] == 1 and img_array.ndim == 3:
+        img_array = np.expand_dims(img_array[:, :, 0], axis=-1)
+
+    img_array = np.expand_dims(img_array, axis=0) / 255.0
+
+    prediction = classifier.predict(img_array)
+    class_index = np.argmax(prediction)
+    confidence = np.max(prediction)
+
+    label = "🌿 Daun Sehat" if class_index == 0 else "🍂 Daun Tidak Sehat"
+    color = "green" if class_index == 0 else "red"
+
+    return label, confidence, color
 
 # ==========================
-# BERANDA
+# NAVIGASI TABS
 # ==========================
-if st.session_state.page == "Beranda":
-    st.markdown("<h1 class='page-title'>🧠 Dashboard UTS - Deteksi & Klasifikasi Citra</h1>", unsafe_allow_html=True)
+tab1, tab2, tab3 = st.tabs(["🏠 Beranda", "🔍 Deteksi & Klasifikasi", "ℹ️ Tentang Aplikasi"])
+
+# ==========================
+# TAB 1 - BERANDA
+# ==========================
+with tab1:
+    st.markdown("### Selamat Datang di Dashboard Proyek UAS 👋")
     st.write("""
-    Selamat datang di **Dashboard UTS Siti Annisa Syahira** 🌸  
-    Aplikasi ini memadukan:
-    - **Deteksi Objek (YOLOv8)** → Apel 🍎 & Jeruk 🍊  
-    - **Klasifikasi Gambar (CNN)** → Daun Sehat 🌱 atau Tidak Sehat 🍂  
+        Aplikasi ini dibuat oleh **Siti Annisa Syahira** sebagai bagian dari proyek UAS.
+        Fungsinya adalah untuk:
+        - 🔍 **Mendeteksi buah (Apel dan Jeruk)** menggunakan model YOLO (.pt).  
+        - 🌿 **Mengklasifikasi daun** apakah **Sehat** atau **Tidak Sehat** menggunakan model Keras (.h5).  
+        
+        Dashboard ini interaktif dan dirancang agar mudah digunakan serta menarik untuk presentasi.
     """)
-    st.image("https://cdn-icons-png.flaticon.com/512/616/616408.png", width=200)
-    st.markdown("<div class='footer'>Dibuat dengan ❤️ oleh Siti Annisa Syahira</div>", unsafe_allow_html=True)
+    st.image("https://cdn.pixabay.com/photo/2017/01/20/00/30/orange-1995056_1280.jpg", use_container_width=True)
+    st.success("Klik tab **Deteksi & Klasifikasi** di atas untuk mulai menggunakan aplikasi ini 🚀")
 
 # ==========================
-# DETEKSI OBJEK
+# TAB 2 - DETEKSI & KLASIFIKASI
 # ==========================
-elif st.session_state.page == "Deteksi":
-    st.markdown("<h1 class='page-title'>🍎 Deteksi Objek Apel & Jeruk</h1>", unsafe_allow_html=True)
-    uploaded = st.file_uploader("Unggah gambar buah (apel/jeruk)", type=["jpg", "jpeg", "png"])
+with tab2:
+    st.markdown("### 📸 Unggah Gambar untuk Analisis")
 
-    if uploaded is not None:
-        img = Image.open(uploaded)
-        st.image(img, caption="Gambar diunggah", use_container_width=True)
+    mode = st.selectbox("Pilih Mode Analisis:", ["Deteksi Objek (Apel/Jeruk)", "Klasifikasi Daun"])
+    uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "jpeg", "png"])
 
-        with st.spinner("🔍 Sedang mendeteksi objek..."):
-            results = yolo_model(img)
-            result_img = results[0].plot()
+    col1, col2 = st.columns(2)
 
-        st.image(result_img, caption="Hasil Deteksi", use_container_width=True)
-        st.success("✅ Deteksi selesai! Objek berhasil ditemukan.")
+    if uploaded_file:
+        img = Image.open(uploaded_file)
+        col1.image(img, caption="Gambar Asli", use_container_width=True)
 
-# ==========================
-# KLASIFIKASI
-# ==========================
-elif st.session_state.page == "Klasifikasi":
-    st.markdown("<h1 class='page-title'>🌿 Klasifikasi Daun Sehat / Tidak Sehat</h1>", unsafe_allow_html=True)
-    uploaded = st.file_uploader("Unggah gambar daun", type=["jpg", "jpeg", "png"])
+        if mode == "Deteksi Objek (Apel/Jeruk)":
+            with st.spinner("🔎 Mendeteksi objek dengan YOLO..."):
+                results = yolo_model(img)
+                result_img = results[0].plot()
+                col2.image(result_img, caption="Hasil Deteksi", use_container_width=True)
 
-    if uploaded is not None:
-        try:
-            img = Image.open(uploaded).convert("RGB")
-            st.image(img, caption="Gambar daun diunggah", use_container_width=True)
+                st.subheader("📊 Detail Deteksi:")
+                for box in results[0].boxes:
+                    cls_id = int(box.cls[0])
+                    conf = float(box.conf[0])
+                    label = results[0].names[cls_id]
+                    st.markdown(f"- **Objek:** {label} | **Akurasi:** `{conf:.2f}`")
 
-            try:
-                input_shape = classifier.input_shape
-                target_size = (input_shape[1], input_shape[2])
-            except Exception:
-                target_size = (224, 224)
+                st.success("✅ Deteksi selesai!")
 
-            img_resized = img.resize(target_size)
-            img_array = image.img_to_array(img_resized)
-            img_array = np.expand_dims(img_array, axis=0) / 255.0
-
-            with st.spinner("🧠 Menganalisis kondisi daun..."):
-                prediction = classifier.predict(img_array)
-
-            class_index = int(np.argmax(prediction))
-            confidence = float(np.max(prediction)) * 100
-
-            if class_index == 0:
-                label = "🌱 Daun Sehat"
-            else:
-                label = "🍂 Daun Tidak Sehat"
-
-            st.success(f"**Hasil Prediksi:** {label}")
-            st.progress(confidence / 100)
-            st.write(f"Tingkat keyakinan: {confidence:.2f}%")
-
-            # 🌿 Efek daun jatuh
-            leaf_animation = "".join([
-                f"<div class='leaf' style='left:{np.random.randint(0,100)}%; animation-duration:{np.random.uniform(5,10)}s;'>🍃</div>"
-                for _ in range(25)
-            ])
-            st.markdown(leaf_animation, unsafe_allow_html=True)
-
-        except Exception as e:
-            st.error(f"Terjadi kesalahan saat memproses gambar: {e}")
+        elif mode == "Klasifikasi Daun":
+            with st.spinner("🧬 Menganalisis kondisi daun..."):
+                label, confidence, color = predict_leaf(img)
+                col2.markdown(
+                    f"<div class='result-box'><h3 style='color:{color};'>{label}</h3>"
+                    f"<p>Probabilitas: <b>{confidence:.2f}</b></p></div>",
+                    unsafe_allow_html=True,
+                )
+                st.balloons()
+    else:
+        st.info("⬆️ Silakan unggah gambar terlebih dahulu untuk melanjutkan.")
 
 # ==========================
-# TENTANG
+# TAB 3 - TENTANG
 # ==========================
-elif st.session_state.page == "Tentang":
-    st.markdown("<h1 class='page-title'>ℹ️ Tentang Aplikasi</h1>", unsafe_allow_html=True)
+with tab3:
+    st.markdown("### 👩‍💻 Tentang Aplikasi")
     st.write("""
-    Aplikasi ini merupakan proyek **UTS Praktikum Pemrograman Big Data** oleh **Siti Annisa Syahira (2208108010085)**.  
-    Fitur utama:
-    - Deteksi buah Apel & Jeruk dengan model YOLOv8  
-    - Klasifikasi daun sehat atau tidak sehat dengan CNN (TensorFlow)  
+        Aplikasi ini dikembangkan menggunakan:
+        - **Streamlit** untuk antarmuka web.
+        - **YOLO (You Only Look Once)** untuk deteksi objek buah (Apel dan Jeruk).
+        - **TensorFlow / Keras** untuk klasifikasi daun (Sehat / Tidak Sehat).
+
+        Model YOLO dan Keras dilatih secara terpisah menggunakan dataset khusus.
+        Tujuan aplikasi ini adalah mempermudah analisis cepat terhadap citra buah dan daun.
     """)
-    st.image("https://cdn-icons-png.flaticon.com/512/765/765613.png", width=160)
-    st.markdown("<div class='footer'>© 2025 Dashboard UTS - All Rights Reserved</div>", unsafe_allow_html=True)
+    st.info("Dikembangkan oleh **Siti Annisa Syahira (2025)** | Proyek UAS")
+
+# ==========================
+# FOOTER
+# ==========================
+st.write("---")
+st.markdown("<footer>© 2025 | Proyek UAS - Siti Annisa Syahira</footer>", unsafe_allow_html=True)
