@@ -10,212 +10,181 @@ import os
 # KONFIGURASI HALAMAN
 # ==========================
 st.set_page_config(
-    page_title="🍎 Dashboard UTS - Deteksi & Klasifikasi",
-    page_icon="🧠",
+    page_title="🧠 Dashboard UTS - Deteksi & Klasifikasi",
+    page_icon="🍎",
     layout="wide"
 )
 
 # ==========================
-# CSS STYLING UNTUK NAVBAR
+# CSS UNTUK NAVIGASI MELAYANG
 # ==========================
 st.markdown("""
     <style>
-        /* Global Styles */
         body {
             background-color: #F8FAFC;
         }
+
+        /* Floating Button */
+        .fab-container {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            z-index: 9999;
+        }
+
+        .fab-button {
+            width: 65px;
+            height: 65px;
+            background-color: #2E8B57;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 2px 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .fab-button:hover {
+            background-color: #3CB371;
+            transform: rotate(90deg);
+        }
+
+        /* Menu Items */
+        .fab-menu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .fab-menu.show {
+            display: flex;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .fab-item {
+            background-color: white;
+            color: #2E8B57;
+            font-weight: bold;
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin: 6px 0;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .fab-item:hover {
+            background-color: #2E8B57;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .title {
             text-align: center;
             color: #1E5631;
-            font-size: 38px;
+            font-size: 36px;
             font-weight: bold;
-            margin-top: 10px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #5f5f5f;
-            font-size: 18px;
-            margin-bottom: 30px;
-        }
-
-        /* Navbar Styling */
-        .nav-container {
-            background-color: #2E8B57;
-            padding: 12px 0;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 25px;
-            box-shadow: 2px 4px 10px rgba(0,0,0,0.1);
-        }
-        .nav-item {
-            display: inline-block;
-            margin: 0 30px;
-            font-size: 18px;
-            font-weight: 500;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s ease-in-out;
-        }
-        .nav-item:hover {
-            color: #FFD700;
-            transform: scale(1.1);
-        }
-        .active {
-            color: #FFD700;
-            border-bottom: 3px solid #FFD700;
-            padding-bottom: 5px;
-        }
-
-        .result-box {
-            padding: 20px; 
-            border-radius: 15px; 
-            background-color: #f0f2f6;
-            text-align: center;
-            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-        }
-        footer {
-            text-align: center;
-            color: gray;
-            margin-top: 40px;
         }
     </style>
 """, unsafe_allow_html=True)
 
+# ==========================
+# HEADER
+# ==========================
 st.markdown("<h1 class='title'>🧠 Dashboard UTS - Deteksi & Klasifikasi Citra</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitle'>Deteksi Apel & Jeruk 🍎🍊 serta Klasifikasi Daun 🌿</p>", unsafe_allow_html=True)
+st.write("---")
 
 # ==========================
-# NAVBAR CUSTOM
+# NAVIGATION HANDLER
 # ==========================
-pages = ["Beranda", "Deteksi & Klasifikasi", "Tentang Aplikasi"]
-page = st.session_state.get("page", "Beranda")
+if "page" not in st.session_state:
+    st.session_state.page = "Beranda"
 
-cols = st.columns(len(pages))
-for i, p in enumerate(pages):
-    if cols[i].button(p):
-        st.session_state.page = p
-        page = p
+menu_clicked = st.session_state.page
 
 # ==========================
-# LOAD MODEL DENGAN AMAN
+# FLOATING NAVIGATION MENU
 # ==========================
-@st.cache_resource
-def load_models():
-    yolo_path = "model/Siti Annisa Syahira_Laporan 4.pt"
-    h5_path = "model/Siti Annisa Syahira_Laporan 2.h5"
+fab_html = """
+    <div class="fab-container">
+        <div class="fab-menu" id="fabMenu">
+            <div class="fab-item" onclick="window.parent.postMessage({type: 'streamlit:setPage', page: 'Beranda'}, '*')">🏠 Beranda</div>
+            <div class="fab-item" onclick="window.parent.postMessage({type: 'streamlit:setPage', page: 'Deteksi'}, '*')">🔍 Deteksi</div>
+            <div class="fab-item" onclick="window.parent.postMessage({type: 'streamlit:setPage', page: 'Klasifikasi'}, '*')">🌿 Klasifikasi</div>
+            <div class="fab-item" onclick="window.parent.postMessage({type: 'streamlit:setPage', page: 'Tentang'}, '*')">ℹ️ Tentang</div>
+        </div>
+        <div class="fab-button" onclick="toggleMenu()">+</div>
+    </div>
 
-    if not os.path.exists(yolo_path):
-        raise FileNotFoundError(f"❌ File YOLO tidak ditemukan di: {os.path.abspath(yolo_path)}")
-    if not os.path.exists(h5_path):
-        raise FileNotFoundError(f"❌ File H5 tidak ditemukan di: {os.path.abspath(h5_path)}")
-
-    yolo_model = YOLO(yolo_path)
-    classifier = tf.keras.models.load_model(h5_path)
-    return yolo_model, classifier
-
-try:
-    yolo_model, classifier = load_models()
-except Exception as e:
-    st.error(f"Gagal memuat model: {e}")
-    st.stop()
-
-# ==========================
-# FUNGSI PREDIKSI DAUN
-# ==========================
-def predict_leaf(image_pil):
-    input_shape = classifier.input_shape
-    target_size = (input_shape[1], input_shape[2])
-
-    if input_shape[3] == 1:
-        img = image_pil.convert("L")
-    else:
-        img = image_pil.convert("RGB")
-
-    img_resized = img.resize(target_size)
-    img_array = image.img_to_array(img_resized)
-
-    if input_shape[3] == 1 and img_array.ndim == 3:
-        img_array = np.expand_dims(img_array[:, :, 0], axis=-1)
-
-    img_array = np.expand_dims(img_array, axis=0) / 255.0
-
-    prediction = classifier.predict(img_array)
-    class_index = np.argmax(prediction)
-    confidence = np.max(prediction)
-
-    label = "🌿 Daun Sehat" if class_index == 0 else "🍂 Daun Tidak Sehat"
-    color = "green" if class_index == 0 else "red"
-
-    return label, confidence, color
+    <script>
+        function toggleMenu() {
+            const menu = window.parent.document.getElementById('fabMenu');
+            menu.classList.toggle('show');
+        }
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'streamlit:setPage') {
+                window.parent.postMessage(event.data, '*');
+            }
+        });
+    </script>
+"""
+st.components.v1.html(fab_html, height=300)
 
 # ==========================
-# ISI HALAMAN
+# PAGE CONTENTS
 # ==========================
-if page == "Beranda":
+if menu_clicked == "Beranda":
     st.markdown("### 👋 Selamat Datang di Dashboard UTS")
     st.write("""
-        Aplikasi ini dikembangkan oleh **Siti Annisa Syahira** untuk memenuhi tugas **UTS**.
-        Fitur yang tersedia:
-        - 🍎 Deteksi **buah Apel dan Jeruk** menggunakan YOLO (.pt)
-        - 🌿 Klasifikasi **daun sehat / tidak sehat** menggunakan model TensorFlow (.h5)
-        
-        Desain ini dibuat agar tampil **menarik, elegan, dan profesional**.
+        Aplikasi ini memanfaatkan **YOLOv8** dan **TensorFlow** untuk mendeteksi objek (buah)
+        serta mengklasifikasi daun sehat dan tidak sehat 🌿.  
+        Gunakan tombol melayang di kanan bawah untuk berpindah halaman!
     """)
-    st.image("https://cdn.pixabay.com/photo/2016/03/05/22/32/apple-1239429_1280.jpg", use_container_width=True)
-    st.info("Klik tombol navigasi di atas untuk mulai menggunakan dashboard ini 🚀")
+    st.image("https://cdn.pixabay.com/photo/2017/01/20/15/06/apples-1995056_1280.jpg", use_container_width=True)
 
-elif page == "Deteksi & Klasifikasi":
-    st.markdown("### 📸 Unggah Gambar untuk Analisis")
-
-    mode = st.radio("Pilih Mode:", ["Deteksi Objek (Apel/Jeruk)", "Klasifikasi Daun"], horizontal=True)
-    uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "jpeg", "png"])
-
-    col1, col2 = st.columns(2)
-
+elif menu_clicked == "Deteksi":
+    st.markdown("### 🔍 Deteksi Objek (Apel/Jeruk)")
+    uploaded_file = st.file_uploader("Unggah gambar untuk deteksi", type=["jpg", "jpeg", "png"])
     if uploaded_file:
         img = Image.open(uploaded_file)
-        col1.image(img, caption="Gambar Asli", use_container_width=True)
-
-        if mode == "Deteksi Objek (Apel/Jeruk)":
-            with st.spinner("🔎 Mendeteksi objek dengan YOLO..."):
-                results = yolo_model(img)
-                result_img = results[0].plot()
-                col2.image(result_img, caption="Hasil Deteksi", use_container_width=True)
-
-                st.subheader("📊 Detail Deteksi:")
-                for box in results[0].boxes:
-                    cls_id = int(box.cls[0])
-                    conf = float(box.conf[0])
-                    label = results[0].names[cls_id]
-                    st.markdown(f"- **Objek:** {label} | **Akurasi:** `{conf:.2f}`")
-                st.success("✅ Deteksi selesai!")
-
-        elif mode == "Klasifikasi Daun":
-            with st.spinner("🧬 Menganalisis kondisi daun..."):
-                label, confidence, color = predict_leaf(img)
-                col2.markdown(
-                    f"<div class='result-box'><h3 style='color:{color};'>{label}</h3>"
-                    f"<p>Probabilitas: <b>{confidence:.2f}</b></p></div>",
-                    unsafe_allow_html=True,
-                )
-                st.balloons()
+        st.image(img, caption="Gambar diunggah", use_container_width=True)
+        st.info("Model YOLO akan digunakan untuk deteksi buah 🍎🍊")
     else:
-        st.info("⬆️ Silakan unggah gambar terlebih dahulu untuk melanjutkan.")
+        st.warning("Silakan unggah gambar terlebih dahulu.")
 
-elif page == "Tentang Aplikasi":
+elif menu_clicked == "Klasifikasi":
+    st.markdown("### 🌿 Klasifikasi Daun Sehat/Tidak Sehat")
+    uploaded_file = st.file_uploader("Unggah gambar daun", type=["jpg", "jpeg", "png"])
+    if uploaded_file:
+        img = Image.open(uploaded_file)
+        st.image(img, caption="Gambar daun", use_container_width=True)
+        st.info("Model TensorFlow akan melakukan klasifikasi daun 🌿")
+    else:
+        st.warning("Silakan unggah gambar terlebih dahulu.")
+
+elif menu_clicked == "Tentang":
     st.markdown("### ℹ️ Tentang Aplikasi")
     st.write("""
-        Dashboard ini menggunakan teknologi:
-        - **Streamlit** untuk antarmuka web interaktif  
-        - **YOLOv8** untuk deteksi objek buah  
-        - **TensorFlow/Keras** untuk klasifikasi daun  
-
-        Tujuan utama aplikasi ini adalah membantu identifikasi visual sederhana dengan tampilan yang modern dan mudah digunakan.
+        Dashboard ini dikembangkan oleh **Siti Annisa Syahira (2025)**  
+        sebagai bagian dari **Ujian Tengah Semester (UTS)**.  
+        Dibangun menggunakan:
+        - Streamlit 💻  
+        - YOLOv8 🧠  
+        - TensorFlow/Keras 🌱  
     """)
-    st.success("Dikembangkan oleh **Siti Annisa Syahira (2025)** | Proyek UTS")
+    st.success("Gunakan tombol melayang di kanan bawah untuk kembali ke halaman lain.")
 
 # ==========================
 # FOOTER
 # ==========================
 st.write("---")
-st.markdown("<footer>© 2025 | Proyek UTS - Siti Annisa Syahira</footer>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:gray;'>© 2025 | Dashboard UTS - Siti Annisa Syahira</p>", unsafe_allow_html=True)
