@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ==========================
-# CSS STYLING + EFEK DAUN
+# CSS + EFEK DAUN JATUH
 # ==========================
 st.markdown("""
     <style>
@@ -38,8 +38,8 @@ st.markdown("""
             margin-bottom: 30px;
         }
         .result-box {
-            padding: 20px; 
-            border-radius: 15px; 
+            padding: 20px;
+            border-radius: 15px;
             background-color: #f0f2f6;
             text-align: center;
             box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
@@ -80,7 +80,7 @@ st.markdown("""
 # HEADER
 # ==========================
 st.markdown("<h1 class='title'>🍎 Dashboard Klasifikasi dan Deteksi Objek Buah & Daun 🍃</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitle'>Analisis Citra Apel, Jeruk, dan Klasifikasi Daun Sehat / Tidak Sehat</p>", unsafe_allow_html=True)
+st.markdown("<p class='subtitle'>Analisis citra Apel, Jeruk, dan Klasifikasi Daun Sehat / Tidak Sehat</p>", unsafe_allow_html=True)
 
 # ==========================
 # LOAD MODEL
@@ -135,33 +135,33 @@ def predict_leaf(image_pil):
     return label, confidence, color
 
 # ==========================
-# NAVIGASI (4 MENU)
+# NAVIGASI UTAMA (4 MENU)
 # ==========================
 st.sidebar.title("🌿 Navigasi Utama")
 menu = st.sidebar.radio(
     "Pilih Halaman:",
-    ["🏠 Beranda", "🔍 Deteksi",  "🌿Klasifikasi", "ℹ️ Tentang Aplikasi"]
+    ["🏠 Beranda", "🔍 Deteksi", "🌿 Klasifikasi", "ℹ️ Tentang Aplikasi"]
 )
 
 # ==========================
-# HALAMAN BERANDA
+# BERANDA
 # ==========================
 if menu == "🏠 Beranda":
-    st.markdown("### Selamat Datang di Dashboard Klasifikasi dan Deteksi Objek Buah & Daun")
+    st.markdown("### Selamat Datang di Dashboard 🍎")
     st.write("""
-        Aplikasi ini dibuat oleh **Siti Annisa Syahira (2208108010085)** sebagai bagian dari proyek **UTS Pemrograman Big Data**.  
-        Fungsinya adalah untuk:
-        - 🔍 **Mendeteksi buah (Apel dan Jeruk)** menggunakan model YOLO (.pt).  
-        - 🌿 **Mengklasifikasi daun** apakah **Sehat** atau **Tidak Sehat** menggunakan model Keras (.h5).  
+        Aplikasi ini dibuat oleh **Siti Annisa Syahira (2208108010085)** sebagai proyek **UTS Pemrograman Big Data**.  
+        Fungsinya:
+        - 🔍 **Deteksi buah (Apel & Jeruk)** dengan model YOLO (.pt)  
+        - 🌿 **Klasifikasi daun** (Sehat / Tidak Sehat) dengan model Keras (.h5)
     """)
     st.image("https://cdn.pixabay.com/photo/2017/01/20/00/30/orange-1995056_1280.jpg", use_container_width=True)
-    st.success("Klik tab **Deteksi Buah** atau **Klasifikasi Daun** untuk mulai 🚀")
+    st.success("Pilih menu di sidebar untuk memulai 🚀")
 
 # ==========================
-# HALAMAN DETEKSI BUAH
+# DETEKSI BUAH
 # ==========================
 elif menu == "🔍 Deteksi":
-    st.markdown("### 🔍 Deteksi")
+    st.markdown("### 🔍 Deteksi Buah")
     uploaded_file = st.file_uploader("Unggah gambar buah", type=["jpg", "jpeg", "png"])
 
     if uploaded_file:
@@ -186,10 +186,10 @@ elif menu == "🔍 Deteksi":
         st.info("⬆️ Silakan unggah gambar buah terlebih dahulu.")
 
 # ==========================
-# HALAMAN KLASIFIKASI DAUN
+# KLASIFIKASI DAUN
 # ==========================
 elif menu == "🌿 Klasifikasi":
-    st.markdown("### 🌿 Klasifikasi")
+    st.markdown("### 🌿 Klasifikasi Daun")
     uploaded_leaf = st.file_uploader("Unggah gambar daun", type=["jpg", "jpeg", "png"])
 
     if uploaded_leaf:
@@ -209,22 +209,22 @@ elif menu == "🌿 Klasifikasi":
         st.info("⬆️ Silakan unggah gambar daun terlebih dahulu.")
 
 # ==========================
-# HALAMAN TENTANG
+# TENTANG APLIKASI
 # ==========================
 elif menu == "ℹ️ Tentang Aplikasi":
     st.markdown("### ℹ️ Tentang Aplikasi")
     st.write("""
         Aplikasi ini dikembangkan menggunakan:
-        - 🧠 **Streamlit** untuk antarmuka interaktif
-        - 🎯 **YOLOv8** untuk deteksi buah (Apel & Jeruk)
-        - 🌿 **TensorFlow / Keras** untuk klasifikasi daun (Sehat / Tidak Sehat)
+        - 🧠 **Streamlit** untuk UI interaktif  
+        - 🎯 **YOLOv8** untuk deteksi buah  
+        - 🌿 **TensorFlow/Keras** untuk klasifikasi daun  
 
-        📚 Tujuan: membantu identifikasi cepat pada citra buah & daun untuk mendukung analisis pertanian modern.
+        🎓 Proyek UTS Pemrograman Big Data  
+        👩‍💻 **Dikembangkan oleh:** Siti Annisa Syahira (2025)
     """)
-    st.info("Dikembangkan oleh **Siti Annisa Syahira (2025)** | Proyek UTS")
 
 # ==========================
 # FOOTER
 # ==========================
 st.write("---")
-st.markdown("<footer>© 2025 | 🍎 Dashboard Klasifikasi dan Deteksi Objek Buah & Daun 🍃 | Siti Annisa Syahira</footer>", unsafe_allow_html=True)
+st.markdown("<footer>© 2025 | 🍎 Dashboard Klasifikasi & Deteksi Buah & Daun 🍃 | Siti Annisa Syahira</footer>", unsafe_allow_html=True)
