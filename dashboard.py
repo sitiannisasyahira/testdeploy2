@@ -147,7 +147,7 @@ menu = st.sidebar.radio(
 # HALAMAN BERANDA
 # ==========================
 if menu == "🏠 Beranda":
-    st.markdown("### Selamat Datang di 🍎 Dashboard Klasifikasi dan Deteksi Objek Buah & Daun 🍃")
+    st.markdown("### Selamat Datang di Dashboard Klasifikasi dan Deteksi Objek Buah & Daun")
     st.write("""
         Aplikasi ini dibuat oleh **Siti Annisa Syahira (2208108010085)** sebagai bagian dari proyek **UTS Pemrograman Big Data**.  
         Dashboard ini memiliki dua fitur utama:
