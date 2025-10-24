@@ -168,11 +168,7 @@ if menu == "🏠 Beranda":
 # ==========================
 elif menu == "🔍 Deteksi":
     st.markdown("<h2 style='color:#2E7D32;'>📸 Unggah Gambar untuk Analisis</h2>", unsafe_allow_html=True)
-elif menu == "🌿 Klasifikasi":
-    st.markdown("<h2 style='color:#2E7D32;'>📸 Unggah Gambar untuk Analisis</h2>", unsafe_allow_html=True)
-
-    mode = st.selectbox("Pilih Mode Analisis:", ["Deteksi Objek (Apel/Jeruk)", "Klasifikasi Daun"])
-    uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "jpeg", "png"])
+      uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "jpeg", "png"])
 
     col1, col2 = st.columns(2)
 
@@ -194,7 +190,12 @@ elif menu == "🌿 Klasifikasi":
                     st.markdown(f"- **Objek:** {label} | **Akurasi:** `{conf:.2f}`")
 
                 st.success("✅ Deteksi selesai!")
+elif menu == "🌿 Klasifikasi":
+    st.markdown("<h2 style='color:#2E7D32;'>📸 Unggah Gambar untuk Analisis</h2>", unsafe_allow_html=True)
 
+    uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "jpeg", "png"])
+
+    col1, col2 = st.columns(2)
         elif mode == "Klasifikasi Daun":
             with st.spinner("🧬 Menganalisis kondisi daun..."):
                 label, confidence, color = predict_leaf(img)
