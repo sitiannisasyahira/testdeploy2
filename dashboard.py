@@ -147,12 +147,12 @@ menu = st.sidebar.radio(
 # BERANDA
 # ==========================
 if menu == "🏠 Beranda":
-    st.markdown("### Selamat Datang di Dashboard 🍎")
+    st.markdown("### Selamat Datang di Dashboard 🍎🌿")
     st.write("""
         Aplikasi ini dibuat oleh **Siti Annisa Syahira (2208108010085)** sebagai proyek **UTS Pemrograman Big Data**.  
-        Fungsinya:
-        - 🔍 **Deteksi buah (Apel & Jeruk)** dengan model YOLO (.pt)  
-        - 🌿 **Klasifikasi daun** (Sehat / Tidak Sehat) dengan model Keras (.h5)
+        Fungsinya adalah untuk:
+        - 🔍 **Mendeteksi buah (Apel & Jeruk)** menggunakan model YOLO (.pt)  
+        - 🌿 **Mengklasifikasi daun** (Sehat / Tidak Sehat) menggunakan model Keras (.h5)
     """)
     st.image("https://cdn.pixabay.com/photo/2017/01/20/00/30/orange-1995056_1280.jpg", use_container_width=True)
     st.success("Pilih menu di sidebar untuk memulai 🚀")
@@ -215,9 +215,9 @@ elif menu == "ℹ️ Tentang Aplikasi":
     st.markdown("### ℹ️ Tentang Aplikasi")
     st.write("""
         Aplikasi ini dikembangkan menggunakan:
-        - 🧠 **Streamlit** untuk UI interaktif  
-        - 🎯 **YOLOv8** untuk deteksi buah  
-        - 🌿 **TensorFlow/Keras** untuk klasifikasi daun  
+        -  **Streamlit** untuk UI interaktif  
+        -  **YOLOv8** untuk deteksi buah  
+        -  **TensorFlow/Keras** untuk klasifikasi daun  
 
         🎓 Proyek UTS Pemrograman Big Data  
         👩‍💻 **Dikembangkan oleh:** Siti Annisa Syahira (2025)
