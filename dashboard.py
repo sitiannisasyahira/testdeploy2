@@ -193,10 +193,9 @@ elif menu == "🌿 Klasifikasi":
     uploaded_leaf = st.file_uploader("Unggah gambar daun", type=["jpg", "jpeg", "png"])
 
     if uploaded_leaf:
-         if uploaded_file:
-        img = Image.open(uploaded_file)
+        img_leaf = Image.open(uploaded_leaf)
         col1, col2 = st.columns(2)
-        col1.image(img, caption="Gambar Daun", use_container_width=True)
+        col1.image(img_leaf, caption="Gambar Daun Asli", use_container_width=True)
 
         with st.spinner("🧬 Menganalisis kondisi daun..."):
             label, confidence, color = predict_leaf(img_leaf)
