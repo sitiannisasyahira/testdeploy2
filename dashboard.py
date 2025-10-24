@@ -10,7 +10,7 @@ import os
 # KONFIGURASI HALAMAN
 # ==========================
 st.set_page_config(
-    page_title="🍎 Dashboard Deteksi Buah & Daun 🍃",
+    page_title="🍎 Dashboard Klasifikasi dan Deteksi Objek Buah & Daun 🍃",
     page_icon="🍃",
     layout="wide"
 )
@@ -79,7 +79,7 @@ st.markdown("""
 # ==========================
 # HEADER
 # ==========================
-st.markdown("<h1 class='title'>🍎 Dashboard Deteksi Buah & Daun 🍃</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='title'>🍎 Dashboard Klasifikasi dan Deteksi Objek Buah & Daun 🍃</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subtitle'>Analisis Citra Apel, Jeruk, dan Klasifikasi Daun Sehat / Tidak Sehat</p>", unsafe_allow_html=True)
 
 # ==========================
@@ -144,15 +144,15 @@ menu = st.sidebar.radio(
 )
 
 # ==========================
-# TAB 1 - BERANDA
+# HALAMAN BERANDA
 # ==========================
 if menu == "🏠 Beranda":
-    st.markdown("### Selamat Datang di 🍎 Dashboard Deteksi Buah & Daun 🍃")
+    st.markdown("### Selamat Datang di 🍎 Dashboard Klasifikasi dan Deteksi Objek Buah & Daun 🍃")
     st.write("""
-        Aplikasi ini dibuat oleh **Siti Annisa Syahira** sebagai bagian dari proyek **UTS 2025**.  
+        Aplikasi ini dibuat oleh **Siti Annisa Syahira (2208108010085)** sebagai bagian dari proyek **UTS Pemrograman Big Data**.  
         Dashboard ini memiliki dua fitur utama:
-        - 🍎 **Deteksi Buah (Apel & Jeruk)** menggunakan model YOLO (.pt)
-        - 🌿 **Klasifikasi Daun (Sehat / Tidak Sehat)** menggunakan model TensorFlow (.h5)
+        - 🔍 **Mendeteksi buah (Apel dan Jeruk)** menggunakan model YOLO (.pt).  
+        - 🌿 **Mengklasifikasi daun** apakah **Sehat** atau **Tidak Sehat** menggunakan model Keras (.h5).  
 
         🌼 Aplikasi ini dirancang dengan antarmuka yang **interaktif, elegan, dan mudah digunakan**.
     """)
@@ -160,7 +160,7 @@ if menu == "🏠 Beranda":
     st.success("Klik tab **Deteksi Buah** atau **Klasifikasi Daun** untuk mulai 🚀")
 
 # ==========================
-# TAB 2 - DETEKSI BUAH
+# HALAMAN DETEKSI BUAH
 # ==========================
 elif menu == "🔍 Deteksi":
     st.markdown("### 🔍 Deteksi")
@@ -188,7 +188,7 @@ elif menu == "🔍 Deteksi":
         st.info("⬆️ Silakan unggah gambar buah terlebih dahulu.")
 
 # ==========================
-# TAB 3 - KLASIFIKASI DAUN
+# HALAMAN KLASIFIKASI DAUN
 # ==========================
 elif menu == "🌿 Klasifikasi":
     st.markdown("### 🌿 Klasifikasi")
@@ -211,10 +211,10 @@ elif menu == "🌿 Klasifikasi":
         st.info("⬆️ Silakan unggah gambar daun terlebih dahulu.")
 
 # ==========================
-# TAB 4 - TENTANG
+# HALAMAN TENTANG
 # ==========================
-with tab4:
-    st.markdown("### 👩‍💻 Tentang Aplikasi")
+elif menu == "ℹ️ Tentang Aplikasi":
+    st.markdown("### ℹ️ Tentang Aplikasi")
     st.write("""
         Aplikasi ini dikembangkan menggunakan:
         - 🧠 **Streamlit** untuk antarmuka interaktif
@@ -229,4 +229,4 @@ with tab4:
 # FOOTER
 # ==========================
 st.write("---")
-st.markdown("<footer>© 2025 | 🍎 Dashboard Deteksi Buah & Daun 🍃 | Siti Annisa Syahira</footer>", unsafe_allow_html=True)
+st.markdown("<footer>© 2025 | 🍎 Dashboard Klasifikasi dan Deteksi Objek Buah & Daun 🍃 | Siti Annisa Syahira</footer>", unsafe_allow_html=True)
