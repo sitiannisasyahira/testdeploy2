@@ -137,7 +137,11 @@ def predict_leaf(image_pil):
 # ==========================
 # NAVIGASI (4 MENU)
 # ==========================
-tab1, tab2, tab3, tab4 = st.tabs(["🏠 Beranda", "🍎 Deteksi Buah", "🌿 Klasifikasi Daun", "ℹ️ Tentang"])
+tab1, tab2, tab3, tab4 = st.sidebar.title("🌿 Navigasi Utama")
+menu = st.sidebar.radio(
+    "Pilih Halaman:",
+    ["🏠 Beranda", "🔍 Deteksi",  "🌿Klasifikasi", "ℹ️ Tentang Aplikasi"]
+)
 
 # ==========================
 # TAB 1 - BERANDA
