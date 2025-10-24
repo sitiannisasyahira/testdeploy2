@@ -137,7 +137,7 @@ def predict_leaf(image_pil):
 # ==========================
 # NAVIGASI UTAMA (4 MENU)
 # ==========================
-st.sidebar.title("🌿 Navigasi Utama")
+st.sidebar.title("Navigasi Utama")
 menu = st.sidebar.radio(
     "Pilih Halaman:",
     ["🏠 Beranda", "🔍 Deteksi", "🌿 Klasifikasi", "ℹ️ Tentang Aplikasi"]
@@ -227,4 +227,4 @@ elif menu == "ℹ️ Tentang Aplikasi":
 # FOOTER
 # ==========================
 st.write("---")
-st.markdown("<footer>© 2025 | 🍎 Dashboard Klasifikasi & Deteksi Buah & Daun 🍃 | Siti Annisa Syahira</footer>", unsafe_allow_html=True)
+st.markdown("<footer>© 2025 | 🍎 Dashboard Klasifikasi dan Deteksi Objek Buah & Daun 🍃 | Siti Annisa Syahira</footer>", unsafe_allow_html=True)
