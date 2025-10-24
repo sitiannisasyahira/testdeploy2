@@ -166,49 +166,48 @@ if menu == "🏠 Beranda":
 # ==========================
 # HALAMAN DETEKSI & KLASIFIKASI
 # ==========================
-elif menu == "🔍 Deteksi":
-    st.markdown("<h2 style='color:#2E7D32;'>📸 Unggah Gambar untuk Analisis</h2>", unsafe_allow_html=True)
-    
-      uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "jpeg", "png"])
-
-    col1, col2 = st.columns(2)
+st.markdown("### 🔎 Deteksi")
+    uploaded_file = st.file_uploader("Unggah gambar buah", type=["jpg", "jpeg", "png"])
 
     if uploaded_file:
         img = Image.open(uploaded_file)
+        col1, col2 = st.columns(2)
         col1.image(img, caption="Gambar Asli", use_container_width=True)
 
-        if mode == "Deteksi Objek (Apel/Jeruk)":
-            with st.spinner("🔎 Mendeteksi objek dengan YOLO..."):
-                results = yolo_model(img)
-                result_img = results[0].plot()
-                col2.image(result_img, caption="Hasil Deteksi", use_container_width=True)
+        with st.spinner("🔎 Mendeteksi buah dengan YOLO..."):
+            results = yolo_model(img)
+            result_img = results[0].plot()
+            col2.image(result_img, caption="Hasil Deteksi", use_container_width=True)
 
-                st.subheader("📊 Detail Deteksi:")
-                for box in results[0].boxes:
-                    cls_id = int(box.cls[0])
-                    conf = float(box.conf[0])
-                    label = results[0].names[cls_id]
-                    st.markdown(f"- **Objek:** {label} | **Akurasi:** `{conf:.2f}`")
+            st.subheader("📊 Detail Deteksi:")
+            for box in results[0].boxes:
+                cls_id = int(box.cls[0])
+                conf = float(box.conf[0])
+                label = results[0].names[cls_id]
+                st.markdown(f"- **Objek:** {label} | **Akurasi:** `{conf:.2f}`")
 
-                st.success("✅ Deteksi selesai!")
-                
-elif menu == "🌿 Klasifikasi":
-    st.markdown("<h2 style='color:#2E7D32;'>📸 Unggah Gambar untuk Analisis</h2>", unsafe_allow_html=True)
-
-    uploaded_file = st.file_uploader("Unggah gambar", type=["jpg", "jpeg", "png"])
-
-    col1, col2 = st.columns(2)
-        elif mode == "Klasifikasi Daun":
-            with st.spinner("🧬 Menganalisis kondisi daun..."):
-                label, confidence, color = predict_leaf(img)
-                col2.markdown(
-                    f"<div class='result-box'><h3 style='color:{color};'>{label}</h3>"
-                    f"<p>Probabilitas: <b>{confidence:.2f}</b></p></div>",
-                    unsafe_allow_html=True,
-                )
-                st.balloons()
+            st.success("✅ Deteksi selesai!")
     else:
-        st.info("⬆️ Silakan unggah gambar terlebih dahulu untuk melanjutkan.")
+        st.info("⬆️ Silakan unggah gambar buah terlebih dahulu.")
+                
+st.markdown("### 🌿 Klasifikasi")
+    uploaded_leaf = st.file_uploader("Unggah gambar daun", type=["jpg", "jpeg", "png"])
+
+    if uploaded_leaf:
+        img_leaf = Image.open(uploaded_leaf)
+        col1, col2 = st.columns(2)
+        col1.image(img_leaf, caption="Gambar Daun Asli", use_container_width=True)
+
+        with st.spinner("🧬 Menganalisis kondisi daun..."):
+            label, confidence, color = predict_leaf(img_leaf)
+            col2.markdown(
+                f"<div class='result-box'><h3 style='color:{color};'>{label}</h3>"
+                f"<p>Probabilitas: <b>{confidence:.2f}</b></p></div>",
+                unsafe_allow_html=True,
+            )
+            st.balloons()
+    else:
+        st.info("⬆️ Silakan unggah gambar daun terlebih dahulu.")
 
 # ==========================
 # HALAMAN TENTANG
