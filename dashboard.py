@@ -150,11 +150,9 @@ if menu == "🏠 Beranda":
     st.markdown("### Selamat Datang di Dashboard Klasifikasi dan Deteksi Objek Buah & Daun")
     st.write("""
         Aplikasi ini dibuat oleh **Siti Annisa Syahira (2208108010085)** sebagai bagian dari proyek **UTS Pemrograman Big Data**.  
-        Dashboard ini memiliki dua fitur utama:
+        Fungsinya adalah untuk:
         - 🔍 **Mendeteksi buah (Apel dan Jeruk)** menggunakan model YOLO (.pt).  
         - 🌿 **Mengklasifikasi daun** apakah **Sehat** atau **Tidak Sehat** menggunakan model Keras (.h5).  
-
-        🌼 Aplikasi ini dirancang dengan antarmuka yang **interaktif, elegan, dan mudah digunakan**.
     """)
     st.image("https://cdn.pixabay.com/photo/2017/01/20/00/30/orange-1995056_1280.jpg", use_container_width=True)
     st.success("Klik tab **Deteksi Buah** atau **Klasifikasi Daun** untuk mulai 🚀")
