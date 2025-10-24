@@ -159,7 +159,6 @@ if menu == "🏠 Beranda":
         - 🔍 **Mendeteksi buah (Apel dan Jeruk)** menggunakan model YOLO (.pt).  
         - 🌿 **Mengklasifikasi daun** apakah **Sehat** atau **Tidak Sehat** menggunakan model Keras (.h5).  
         
-        Dashboard ini interaktif, modern, dan cocok untuk presentasi UTS kamu!
     """)
     st.image("https://cdn.pixabay.com/photo/2017/01/20/00/30/orange-1995056_1280.jpg", use_container_width=True)
     st.success("Klik menu **Deteksi & Klasifikasi** di sidebar untuk mulai 🚀")
@@ -167,7 +166,9 @@ if menu == "🏠 Beranda":
 # ==========================
 # HALAMAN DETEKSI & KLASIFIKASI
 # ==========================
-elif menu == "🔍 Deteksi & Klasifikasi":
+elif menu == "🔍 Deteksi":
+    st.markdown("<h2 style='color:#2E7D32;'>📸 Unggah Gambar untuk Analisis</h2>", unsafe_allow_html=True)
+elif menu == "🌿 Klasifikasi":
     st.markdown("<h2 style='color:#2E7D32;'>📸 Unggah Gambar untuk Analisis</h2>", unsafe_allow_html=True)
 
     mode = st.selectbox("Pilih Mode Analisis:", ["Deteksi Objek (Apel/Jeruk)", "Klasifikasi Daun"])
