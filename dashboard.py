@@ -149,7 +149,7 @@ menu = st.sidebar.radio(
 if menu == "🏠 Beranda":
     st.markdown("### Selamat Datang di Dashboard 🍎🌿")
     st.write("""
-        Aplikasi ini dibuat oleh **Siti Annisa Syahira (2208108010085)** sebagai proyek **UTS Pemrograman Big Data**.  
+        Aplikasi ini dibuat oleh **Siti Annisa Syahira (2208108010085)** sebagai proyek **UTS Praktikum Pemrograman Big Data**.  
         Fungsinya adalah untuk:
         - 🔍 **Mendeteksi buah (Apel & Jeruk)** menggunakan model YOLO (.pt)  
         - 🌿 **Mengklasifikasi daun** (Sehat / Tidak Sehat) menggunakan model Keras (.h5)
