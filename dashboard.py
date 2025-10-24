@@ -146,7 +146,7 @@ menu = st.sidebar.radio(
 # ==========================
 # TAB 1 - BERANDA
 # ==========================
-with tab1:
+if menu == "🏠 Beranda":
     st.markdown("### Selamat Datang di 🍎 Dashboard Deteksi Buah & Daun 🍃")
     st.write("""
         Aplikasi ini dibuat oleh **Siti Annisa Syahira** sebagai bagian dari proyek **UTS 2025**.  
@@ -162,8 +162,8 @@ with tab1:
 # ==========================
 # TAB 2 - DETEKSI BUAH
 # ==========================
-with tab2:
-    st.markdown("### 🍎 Deteksi Buah (Apel & Jeruk)")
+elif menu == "🔍 Deteksi":
+    st.markdown("### 🔍 Deteksi")
     uploaded_file = st.file_uploader("Unggah gambar buah", type=["jpg", "jpeg", "png"])
 
     if uploaded_file:
@@ -190,8 +190,8 @@ with tab2:
 # ==========================
 # TAB 3 - KLASIFIKASI DAUN
 # ==========================
-with tab3:
-    st.markdown("### 🌿 Klasifikasi Daun")
+elif menu == "🌿 Klasifikasi":
+    st.markdown("### 🌿 Klasifikasi")
     uploaded_leaf = st.file_uploader("Unggah gambar daun", type=["jpg", "jpeg", "png"])
 
     if uploaded_leaf:
